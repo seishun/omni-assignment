@@ -1,0 +1,23 @@
+{
+  "name": "omni-assignment",
+  "version": "1.0.0",
+  "description": "Code assignment for Omni",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seishun/omni-assignment.git"
+  },
+  "author": "Nikolai Vavilov <vvnicholas@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/seishun/omni-assignment/issues"
+  },
+  "homepage": "https://github.com/seishun/omni-assignment#readme",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2"
+  }
+}
