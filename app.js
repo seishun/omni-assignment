@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var pg = require('pg');
 
 var pool = new pg.Pool();
+var port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 
@@ -56,6 +57,6 @@ app.post('/config', function(req, res, next) {
   });
 });
 
-app.listen(8080, function() {
-  console.log('Listening on port 8080');
+app.listen(port, function() {
+  console.log('Listening on port ' + port);
 });
