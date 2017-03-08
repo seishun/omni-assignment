@@ -36,6 +36,12 @@ app.get('/config/:client/:version', function(req, res, next) {
 });
 
 app.post('/config', function(req, res, next) {
+  if (!['client', 'version', 'key', 'value'].every(function(key) {
+    return key in req.body;
+  })) {
+    return res.status(400).end();
+  }
+  
   pool.query('INSERT INTO configs (client, version, key, value) values ($1, $2, $3, $4)', [
     req.body.client,
     req.body.version,
