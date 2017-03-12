@@ -1,63 +1,34 @@
-var app = require('express')();
+var express = require('express');
+var logger = require('morgan');
 var bodyParser = require('body-parser');
-var pg = require('pg');
 
-var config = require('pg-connection-string').parse(process.env.DATABASE_URL);
-var pool = new pg.Pool(config);
-var port = process.env.PORT || 8080;
+var index = require('./routes/index');
 
+var app = express();
+
+if (process.env.NODE_ENV !== 'test') {
+  app.use(logger('dev'));
+}
 app.use(bodyParser.json());
 
-app.get('/config/:client/:version', function(req, res, next) {
-  var etag = /^(?:W\/)?"(\d+)"/.exec(req.get('If-None-Match'));
-  var offset = etag ? +etag[1] : 0;
-  
-  pool.query('SELECT ID, key, value FROM configs WHERE ID > $1 AND client = $2 AND version = $3', [
-    offset,
-    req.params.client,
-    req.params.version
-  ], function(err, result) {
-    if (err) {
-      console.log(err);
-      return res.status(500).end();
-    }
-    
-    var fields = {};
-    result.rows.forEach(function(row) {
-      fields[row.key] = row.value;
-    });
-    
-    if (Object.keys(fields).length > 0) {
-      var lastETag = result.rows.pop().id;
-      res.set('ETag', 'w/"' + lastETag + '"');
-      res.json(fields);
-    } else {
-      res.status(304).end();
-    }
-  });
+app.use('/', index);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
 
-app.post('/config', function(req, res, next) {
-  if (!['client', 'version', 'key', 'value'].every(function(key) {
-    return key in req.body;
-  })) {
-    return res.status(400).end();
-  }
-  
-  pool.query('INSERT INTO configs (client, version, key, value) values ($1, $2, $3, $4)', [
-    req.body.client,
-    req.body.version,
-    req.body.key,
-    req.body.value
-  ], function(err, result) {
-    if (err) {
-      console.log(err);
-      return res.status(500).end();
-    }
-    res.status(201).end();
-  });
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
 });
 
-app.listen(port, function() {
-  console.log('Listening on port ' + port);
-});
+module.exports = app;
